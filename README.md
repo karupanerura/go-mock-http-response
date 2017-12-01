@@ -2,6 +2,10 @@
 
 Simple http client mock tool.
 
+[![Build Status](https://travis-ci.org/karupanerura/go-mock-http-response.svg?branch=master)](https://travis-ci.org/karupanerura/go-mock-http-response)
+[![codecov](https://codecov.io/gh/karupanerura/go-mock-http-response/branch/master/graph/badge.svg)](https://codecov.io/gh/karupanerura/go-mock-http-response)
+[![GoDoc](https://godoc.org/github.com/karupanerura/go-mock-http-response?status.svg)](http://godoc.org/github.com/karupanerura/go-mock-http-response)
+
 ## SYNOPSIS
 
 ```go

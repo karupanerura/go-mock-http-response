@@ -116,4 +116,67 @@ func TestResponseMock(t *testing.T) {
 	if res.TLS != nil {
 		t.Error("TLS should not be nil")
 	}
+
+	t.Run("Empty", func(t *testing.T) {
+		res := NewResponseMock(http.StatusOK, nil, nil).MakeResponse(req)
+		if res.Header == nil {
+			t.Error("Header should not be nil")
+		}
+		if headers := len(res.Header); headers != 1 {
+			t.Errorf("Headers count should be 1, but got %d", headers)
+		}
+		if cl := res.Header.Get("Content-Length"); cl != "0" {
+			t.Errorf("Content-Length header should be 0, but got %s", cl)
+		}
+		if res.ContentLength != 0 {
+			t.Errorf("ContentLength should be 0, but got %d", res.ContentLength)
+		}
+
+		if res.Body == nil {
+			t.Error("Body should not be nil")
+		}
+		if body, err := ioutil.ReadAll(res.Body); body == nil || err != nil || len(body) != 0 {
+			t.Errorf(`Body should be empty, but got: "%s"`, string(body))
+		}
+	})
+
+	t.Run("StatusNoContent", func(t *testing.T) {
+		res := NewResponseMock(http.StatusNoContent, nil, nil).MakeResponse(req)
+		if res.Header == nil {
+			t.Error("Header should not be nil")
+		}
+		if headers := len(res.Header); headers != 0 {
+			t.Errorf("Headers count should be 0, but got %d", headers)
+		}
+		if res.ContentLength != 0 {
+			t.Errorf("ContentLength should be 0, but got %d", res.ContentLength)
+		}
+
+		if res.Body == nil {
+			t.Error("Body should not be nil")
+		}
+		if body, err := ioutil.ReadAll(res.Body); body == nil || err != nil || len(body) != 0 {
+			t.Errorf(`Body should be empty, but got: "%s"`, string(body))
+		}
+	})
+
+	t.Run("StatusNotModified", func(t *testing.T) {
+		res := NewResponseMock(http.StatusNotModified, nil, []byte("should ignore this body")).MakeResponse(req)
+		if res.Header == nil {
+			t.Error("Header should not be nil")
+		}
+		if headers := len(res.Header); headers != 0 {
+			t.Errorf("Headers count should be 0, but got %d", headers)
+		}
+		if res.ContentLength != 0 {
+			t.Errorf("ContentLength should be 0, but got %d", res.ContentLength)
+		}
+
+		if res.Body == nil {
+			t.Error("Body should not be nil")
+		}
+		if body, err := ioutil.ReadAll(res.Body); body == nil || err != nil || len(body) != 0 {
+			t.Errorf(`Body should be empty, but got: "%s"`, string(body))
+		}
+	})
 }

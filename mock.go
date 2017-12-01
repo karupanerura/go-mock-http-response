@@ -22,9 +22,14 @@ func (c *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return c.ResponseMock.MakeResponse(req), nil
 }
 
+var emptyBytes = []byte{}
+
 func NewResponseMock(statusCode int, headers map[string]string, body []byte) *ResponseMock {
 	if headers == nil {
 		headers = map[string]string{}
+	}
+	if body == nil {
+		body = emptyBytes
 	}
 	return &ResponseMock{StatusCode: statusCode, HeadersMap: headers, Body: body}
 }
@@ -53,7 +58,7 @@ func (r *ResponseMock) MakeResponse(req *http.Request) *http.Response {
 	contentLength := len(r.Body)
 	header.Set("Content-Length", strconv.Itoa(contentLength))
 
-	return &http.Response{
+	res := &http.Response{
 		Status:           status,
 		StatusCode:       r.StatusCode,
 		Proto:            "HTTP/1.0",
@@ -69,4 +74,15 @@ func (r *ResponseMock) MakeResponse(req *http.Request) *http.Response {
 		Request:          req,
 		TLS:              nil,
 	}
+
+	// should no set Content-Length header when 204 or 304
+	if r.StatusCode == http.StatusNoContent || r.StatusCode == http.StatusNotModified {
+		if res.ContentLength != 0 {
+			res.Body = ioutil.NopCloser(bytes.NewReader(emptyBytes))
+			res.ContentLength = 0
+		}
+		header.Del("Content-Length")
+	}
+
+	return res
 }
